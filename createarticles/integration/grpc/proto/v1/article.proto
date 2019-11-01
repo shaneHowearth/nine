@@ -1,0 +1,21 @@
+syntax="proto3";
+package v1;
+
+message Article{
+	string api = 1;
+	string id = 2;
+	string title = 3;
+	string date = 4;
+	string body = 5;
+	repeated string tags = 6;
+}
+
+message Acknowledgement{
+	string api = 1;
+	string id = 2;
+}
+
+// Service to manage Article tasks
+service ArticleService {
+	rpc CreateArticle(Article) returns (Acknowledgement){}
+}
