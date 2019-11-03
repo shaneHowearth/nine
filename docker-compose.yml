@@ -1,0 +1,24 @@
+version: '3'
+services:
+    articledb:
+        build: articledb/
+        ports:
+            - "5432"
+    creator:
+        build: createarticles/
+        ports:
+            - "5100:5100"
+    restserver:
+        build: REST/
+        environment:
+            - PORT_NUM=80
+        ports:
+            - "80:80"
+    readarticle:
+        build: readarticles/
+        environment:
+            - PORT_NUM=5200
+        ports:
+            - "5200"
+        depends_on:
+            - articledb
