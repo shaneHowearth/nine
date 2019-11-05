@@ -67,6 +67,7 @@ func (r *Redis) GetTagInfo(tagName, date string) *grpcProto.TagInfo {
 	defer conn.Close()
 	// fix date
 	date = date[:4] + "-" + date[4:6] + "-" + date[6:]
+
 	ids, err := redis.Strings(conn.Do("LRANGE", tagName+":"+date, 0, 2147483647))
 	if err != nil {
 		// TODO
