@@ -147,7 +147,6 @@ func (r *Redis) GetByID(id string) (*grpcProto.Article, bool) {
 	if err != nil {
 		log.Printf("error scanning struct: %v", err)
 	}
-	log.Printf("Is Article nil? %v", article)
 	article.Id = id
 	article.Title = f.Title
 	article.Date = f.Date

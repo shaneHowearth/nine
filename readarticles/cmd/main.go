@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/shanehowearth/nine/readarticles/internal/messagequeue/rabbit"
 	readarticle "github.com/shanehowearth/nine/readarticles/internal/readarticleservice"
 	database "github.com/shanehowearth/nine/readarticles/internal/repository/postgres"
 	repo "github.com/shanehowearth/nine/readarticles/internal/repository/redis"
@@ -26,6 +27,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
+	mq := rabbit.MQ{}
+	go func() {
+		if err := mq.Receive(ss); err != nil {
+			log.Printf("mq Receiver died with error: %v", err)
+		}
+	}()
 	s := grpc.NewServer()
 	grpcProto.RegisterArticleServiceServer(s, &server{})
 	reflection.Register(s)
