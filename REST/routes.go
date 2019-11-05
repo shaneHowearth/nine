@@ -111,12 +111,11 @@ func CreateArticles(w http.ResponseWriter, req *http.Request) {
 	if match, _ := regexp.MatchString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$", a.GetDate()); !match {
 		respondWithError(w, http.StatusBadRequest, "Bad date format supplied. Date must be YYYY-MM-DD")
 	}
-	log.Println("Date was FINE")
-	ack, err := ac.CreateArticle(a)
-	if err != nil {
+	ack := ac.CreateArticle(a)
+	if ack.Errormessage != "" {
 
 		log.Printf("An error occurred with CreateArticles, Error: %v", err)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, http.StatusInternalServerError, ack.ErrorMessage)
 	}
 	respondWithJSON(w, http.StatusOK, ack)
 
