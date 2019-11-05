@@ -3,6 +3,7 @@ package articleservice
 import (
 	"context"
 	"log"
+	"time"
 
 	grpcProto "github.com/shanehowearth/nine/readarticles/integration/grpc/proto/v1"
 	repo "github.com/shanehowearth/nine/readarticles/integration/repository/cache/v1"
@@ -26,12 +27,22 @@ func NewArticleService(c repo.Cache, s database.Storage) grpcProto.ArticleServic
 	a := articleServiceServer{Cache: c, Store: s}
 	// Fill the cache with data
 	const startcount = 100
-	articles, err := a.Store.FetchLatestRows(startcount)
+	var err error
+	var articles []*grpcProto.Article
+	for numTries := 0; numTries < 5; numTries++ {
+		articles, err = a.Store.FetchLatestRows(startcount)
+		if err == nil {
+			// No error means we have succeeded in talking to the DB
+			break
+		}
+		// Wait a second for the DB to come back to life
+		time.Sleep(1 * time.Second)
+	}
 	if err != nil {
-		log.Panicf("Unable to get any data for the cache, error: %v", err)
+		log.Printf("Unable to get any data for the cache, error: %v", err)
 	}
 	if err = a.Cache.Populate(articles...); err != nil {
-		log.Panicf("Unable to populate cache, error: %v", err)
+		log.Printf("Unable to populate cache, error: %v", err)
 	}
 	return &a
 }
