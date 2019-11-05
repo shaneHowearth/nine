@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/lib/pq"
 	grpcProto "github.com/shanehowearth/nine/readarticles/integration/grpc/proto/v1"
@@ -17,12 +18,18 @@ type Postgres struct {
 // Connect - Create the connection to the database
 func (p *Postgres) Connect() (err error) {
 	connStr := "postgres://articlewriter:hu8jmn3@articledb/article_postgres_db?sslmode=disable"
-	p.db, err = sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatalf("Unable to open connection to postgres, error: %v", err)
+	// Infinite loop
+	for {
+		for i := 0; i < 5; i++ {
+			p.db, err = sql.Open("postgres", connStr)
+			if err == nil {
+				return
+			}
+		}
+		// TODO raise monitored alert
+		log.Printf("Unable to open connection to postgres, error: %v", err)
+		time.Sleep(5 * time.Second)
 	}
-
-	return nil
 }
 
 // FetchLatestRows -
