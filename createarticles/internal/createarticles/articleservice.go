@@ -7,20 +7,26 @@ import (
 
 	"github.com/google/uuid"
 	grpc "github.com/shanehowearth/nine/createarticles/integration/grpc/proto/v1"
+	messagequeue "github.com/shanehowearth/nine/createarticles/integration/messagequeue/v1"
 	repository "github.com/shanehowearth/nine/createarticles/integration/repository/v1"
 )
 
 // articleServiceServer is implementation of v1.ArticleServiceServer proto interface.
 type articleServiceServer struct {
 	Storage repository.Storage
+	Signal  messagequeue.MQ
 }
 
 // NewArticleService creates Article service.
-func NewArticleService(s repository.Storage) grpc.ArticleServiceServer {
+func NewArticleService(s repository.Storage, mq messagequeue.MQ) grpc.ArticleServiceServer {
 	if s == nil {
 		log.Panic("NewArticleService has no cache to get articles from")
 	}
-	a := articleServiceServer{Storage: s}
+	if mq == nil {
+		log.Panic("NewArticleService has no messagequeue to send to")
+
+	}
+	a := articleServiceServer{Storage: s, Signal: mq}
 	return &a
 }
 
@@ -37,6 +43,10 @@ func (a *articleServiceServer) CreateArticle(ctx context.Context, req *grpc.Arti
 		}
 		log.Printf("Error creating article in repository: %v, code: %s", err, id.String())
 		return &grpc.Acknowledgement{}, fmt.Errorf("unable to create article, please quote code: %s", id.String())
+	}
+	// Alert all the observers that a new article exists
+	if err = a.Signal.Publish(id); err != nil {
+		log.Printf("Error sending alert of new article: %v", err)
 	}
 	return &grpc.Acknowledgement{Id: id}, nil
 }

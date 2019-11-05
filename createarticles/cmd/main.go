@@ -7,6 +7,7 @@ import (
 	"os"
 
 	article "github.com/shanehowearth/nine/createarticles/internal/createarticles"
+	messagequeue "github.com/shanehowearth/nine/createarticles/internal/messagequeue/rabbit"
 	repo "github.com/shanehowearth/nine/createarticles/internal/repository/postgres"
 
 	grpcProto "github.com/shanehowearth/nine/createarticles/integration/grpc/proto/v1"
@@ -16,7 +17,7 @@ import (
 
 type server struct{}
 
-var ss = article.NewArticleService(new(repo.Postgres))
+var ss = article.NewArticleService(new(repo.Postgres), new(messagequeue.MQ))
 
 func main() {
 
