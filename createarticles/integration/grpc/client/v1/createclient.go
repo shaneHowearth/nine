@@ -34,6 +34,7 @@ func (s *CreateClient) CreateArticle(article *proto.Article) *proto.Acknowledgem
 
 	ack, err := c.CreateArticle(ctx, article)
 	ack.Errmessage = "LALALALLALA"
+	log.Printf("Ack inside: %#+v", ack)
 	if err != nil {
 		ack = &proto.Acknowledgement{Errmessage: err.Error()}
 	}
