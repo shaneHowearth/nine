@@ -39,9 +39,12 @@ func articleRoutes(router *chi.Mux) {
 
 // GetArticlesByTag -
 func GetArticlesByTag(w http.ResponseWriter, req *http.Request) {
-	// tags are so freeform that almost anything is allowable (except SQL!)
-	// TODO I'm going to disallow any characters not in the set [0-9a-zA-Z ]
 	tagname := chi.URLParam(req, "tagname")
+	// Disallow tagnames that contain characters not in the set [0-9a-zA-Z]
+	if match, _ := regexp.MatchString("^[0-9a-zA-Z ]+$", tagname); !match {
+		respondWithError(w, http.StatusBadRequest, "Bad tagname supplied.")
+		return
+	}
 	date := chi.URLParam(req, "date")
 	// validations
 	var badDate bool
