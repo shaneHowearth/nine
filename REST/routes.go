@@ -89,10 +89,9 @@ func GetArticlesByID(w http.ResponseWriter, req *http.Request) {
 
 	article, err := ra.GetArticle(&ragrpcProto.ArticleRequest{Id: id})
 	if err != nil {
-		// log the error
+		// TODO Check if the Read server is alive.
 		log.Printf("An error occurred with GetArticlesByID, Error: %v", err)
 		// We don't want the user to know about the inner workings of the application
-		// But we do want to be able to uniquely identify the error
 		respondWithError(w, http.StatusInternalServerError, "An unexpected error has occurred, the issue has been reported to our engineers and will be looked into")
 	}
 	respondWithJSON(w, http.StatusOK, article)
@@ -118,6 +117,7 @@ func CreateArticles(w http.ResponseWriter, req *http.Request) {
 	ack := ac.CreateArticle(a)
 	if ack.GetErrormessage() != "" {
 
+		// TODO Check if the Create server is alive.
 		log.Printf("An error occurred with CreateArticles, Error: %v", err)
 		respondWithError(w, http.StatusInternalServerError, ack.GetErrormessage())
 		return

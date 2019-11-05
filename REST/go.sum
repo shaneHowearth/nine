@@ -17,10 +17,11 @@ github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/lib/pq v1.2.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rafaeljusto/redigomock v0.0.0-20191016070255-2f957ca2c86c/go.mod h1:JaY6n2sDr+z2WTsXkOmNRUfDy6FN0L6Nk7x06ndm4tY=
-github.com/shanehowearth/nine/createarticles v0.0.0-20191105051322-638a551939fd h1:a4xjU7nZBgf15YhJzUP+QGHgdA4uHFUJnZPBaWEznQo=
-github.com/shanehowearth/nine/createarticles v0.0.0-20191105051322-638a551939fd/go.mod h1:NBeTaGDoXDyrQY+AzvSwtDnPvQw0akaQzG8ohN906BI=
-github.com/shanehowearth/nine/readarticles v0.0.0-20191105051322-638a551939fd h1:RFjqdQwi0o8e4pE+rKoOujjq0ZCAOlgYt2Vs7biSULk=
-github.com/shanehowearth/nine/readarticles v0.0.0-20191105051322-638a551939fd/go.mod h1:7HJA1vnVx2Q82QHVa6xrC/NqGcmdwO7/LOmfTDhzSXE=
+github.com/shanehowearth/nine/createarticles v0.0.0-20191105111620-b1b76fd3dffd h1:MOaybACdVpO50Fxikeg2/4iDKBkS3Tya2Vzc5i8QKD0=
+github.com/shanehowearth/nine/createarticles v0.0.0-20191105111620-b1b76fd3dffd/go.mod h1:aqOsip6C3swQbLAuXaI7TUfrZXN+ksANyCDcEbDZX1s=
+github.com/shanehowearth/nine/readarticles v0.0.0-20191105111620-b1b76fd3dffd h1:H77fMJ7sOEf48tIVXisVVhQFxA1QRt5nS88b6lNQw4U=
+github.com/shanehowearth/nine/readarticles v0.0.0-20191105111620-b1b76fd3dffd/go.mod h1:7HJA1vnVx2Q82QHVa6xrC/NqGcmdwO7/LOmfTDhzSXE=
+github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
