@@ -27,7 +27,7 @@ func NewArticleService(s repository.Storage) grpc.ArticleServiceServer {
 // CreateArticle - Create Article.
 func (a *articleServiceServer) CreateArticle(ctx context.Context, req *grpc.Article) (*grpc.Acknowledgement, error) {
 	// Handler validates the input.
-	id, err := a.Storage.CreateorUpdate(req)
+	id, err := a.Storage.Create(req)
 	if err != nil {
 		// create a unique uuid for the user to quote to tech support.
 		id, uuiderr := uuid.NewUUID()

@@ -28,7 +28,7 @@ func (p *Postgres) Connect() (err error) {
 }
 
 // CreateOrUpdate -
-func (p *Postgres) CreateorUpdate(article *grpcProto.Article) (string, error) {
+func (p *Postgres) Create(article *grpcProto.Article) (string, error) {
 	if p.db == nil {
 		perr := p.Connect()
 		if perr != nil {

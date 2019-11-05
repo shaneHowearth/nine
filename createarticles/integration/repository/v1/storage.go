@@ -10,5 +10,5 @@ import (
 )
 
 type Storage interface {
-	CreateorUpdate(article *grpcProto.Article) (string, error)
+	Create(article *grpcProto.Article) (string, error)
 }
