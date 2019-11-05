@@ -112,10 +112,10 @@ func CreateArticles(w http.ResponseWriter, req *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Bad date format supplied. Date must be YYYY-MM-DD")
 	}
 	ack := ac.CreateArticle(a)
-	if ack.Errormessage != "" {
+	if ack.GetErrormessage() != "" {
 
 		log.Printf("An error occurred with CreateArticles, Error: %v", err)
-		respondWithError(w, http.StatusInternalServerError, ack.ErrorMessage)
+		respondWithError(w, http.StatusInternalServerError, ack.GetErrormessage())
 	}
 	respondWithJSON(w, http.StatusOK, ack)
 
