@@ -26,7 +26,7 @@ func (s *CreateClient) newConnection() (proto.ArticleServiceClient, *grpc.Client
 }
 
 // CreateArticle -
-func (s *CreateClient) CreateArticle(article *proto.Article) (*proto.Acknowledgement, error) {
+func (s *CreateClient) CreateArticle(article *proto.Article) *proto.Acknowledgement {
 	c, conn := s.newConnection()
 	defer conn.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -34,7 +34,7 @@ func (s *CreateClient) CreateArticle(article *proto.Article) (*proto.Acknowledge
 
 	ack, err := c.CreateArticle(ctx, article)
 	if err != nil {
-		return nil, err
+		ack = *proto.Acknowledgement{Errormessage: err.Error()}
 	}
-	return ack, nil
+	return ack
 }
