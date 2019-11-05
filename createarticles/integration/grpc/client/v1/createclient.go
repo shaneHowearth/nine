@@ -33,10 +33,8 @@ func (s *CreateClient) CreateArticle(article *proto.Article) *proto.Acknowledgem
 	defer cancel()
 
 	ack, err := c.CreateArticle(ctx, article)
-	ack.Errmessage = "LALALALLALA"
-	log.Printf("Ack inside: %#+v", ack)
 	if err != nil {
-		ack = &proto.Acknowledgement{Errmessage: err.Error()}
+		ack = &proto.Acknowledgement{Errormessage: err.Error()}
 	}
 	return ack
 }
