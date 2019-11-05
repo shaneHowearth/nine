@@ -3,6 +3,7 @@ package rediscache
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gomodule/redigo/redis"
@@ -64,6 +65,8 @@ func (r *Redis) GetTagInfo(tagName, date string) *grpcProto.TagInfo {
 		conn = r.Pool.Get()
 	}
 	defer conn.Close()
+	// fix date
+	date = date[:4] + "-" + date[4:6] + "-" + date[6:]
 	ids, err := redis.Strings(conn.Do("LRANGE", tagName+":"+date, 0, 2147483647))
 	if err != nil {
 		// TODO
@@ -82,8 +85,17 @@ func (r *Redis) GetTagInfo(tagName, date string) *grpcProto.TagInfo {
 			tags[tag] = struct{}{}
 		}
 	}
-	// TODO
-	return nil
+	var ti grpcProto.TagInfo
+	ti.RelatedTags = make([]string, len(tags))
+	i := 0
+	for k := range tags {
+		ti.RelatedTags[i] = k
+		i++
+	}
+	ti.Count = strconv.Itoa(len(ids))
+	ti.Articles = ids
+	ti.Tag = tagName
+	return &ti
 }
 
 // GetTags -
