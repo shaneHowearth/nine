@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/go-chi/chi"
@@ -107,8 +108,16 @@ func CreateArticles(w http.ResponseWriter, req *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "An unexpected error has occurred, the issue has been reported to our engineers and will be looked into")
 	}
 	// TODO validate Date
+	if match, _ := regexp.MatchString("^[0-9]{4}-[0-9]{2}-[0-9]{2}$", a.GetDate()); !match {
+		respondWithError(w, http.StatusBadRequest, "Bad date format supplied. Date must be YYYY-MM-DD")
+	}
+	log.Println("Date was FINE")
+	ack, err := ac.CreateArticle(a)
+	if err != nil {
 
-	ack := ac.CreateArticle(a)
+		log.Printf("An error occurred with CreateArticles, Error: %v", err)
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
 	respondWithJSON(w, http.StatusOK, ack)
 
 }
