@@ -6,5 +6,6 @@ require (
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/shanehowearth/nine/createarticles v0.0.0-20191103093123-13eb99e02442
+	github.com/shanehowearth/nine/readarticles v0.0.0-20191105002427-b0605a92a831
 	golang.org/x/net v0.0.0-20191101175033-0deb6923b6d9 // indirect
 )
