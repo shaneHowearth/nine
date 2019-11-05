@@ -36,7 +36,15 @@ func NewArticleService(c repo.Cache, s database.Storage) grpcProto.ArticleServic
 	return &a
 }
 
-// GetArticle(context.Context, *ArticleRequest) (*Article, error)
+// GetTagInfo -
+func (a *articleServiceServer) GetTagInfo(ctx context.Context, req *grpcProto.ArticleRequest) (*grpcProto.TagInfo, error) {
+	log.Printf("GetArticle readarticleservice req: %#+v", req)
+	article := a.Cache.GetTagInfo(req.GetTag(), req.GetDate())
+
+	return article, nil
+}
+
+// GetArticle -
 func (a *articleServiceServer) GetArticle(ctx context.Context, req *grpcProto.ArticleRequest) (*grpcProto.Article, error) {
 	log.Printf("GetArticle readarticleservice req: %#+v", req)
 	article := a.Cache.GetByID(req.GetId())

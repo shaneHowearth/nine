@@ -7,8 +7,8 @@ import (
 	"os"
 
 	readarticle "github.com/shanehowearth/nine/readarticles/internal/readarticleservice"
-	repo "github.com/shanehowearth/nine/readarticles/internal/repository/redis"
 	database "github.com/shanehowearth/nine/readarticles/internal/repository/postgres"
+	repo "github.com/shanehowearth/nine/readarticles/internal/repository/redis"
 
 	grpcProto "github.com/shanehowearth/nine/readarticles/integration/grpc/proto/v1"
 	"google.golang.org/grpc"
@@ -32,6 +32,15 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+// GetTagInfo -
+func (s *server) GetTagInfo(ctx context.Context, req *grpcProto.ArticleRequest) (*grpcProto.TagInfo, error) {
+	st, err := ss.GetTagInfo(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return st, nil
 }
 
 // GetArticle -

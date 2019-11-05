@@ -9,6 +9,13 @@ import (
 	grpcProto "github.com/shanehowearth/nine/readarticles/integration/grpc/proto/v1"
 )
 
+type tmpStruct struct {
+	ID    string `redis:"id"`
+	Title string `redis:"title"`
+	Date  string `redis:"date"`
+	Body  string `redis:"body"`
+}
+
 // Populate - Fill the cache with data
 func (r *Redis) Populate(articles ...*grpcProto.Article) error {
 	// get conn and put back when exit from method
@@ -31,7 +38,11 @@ func (r *Redis) Populate(articles ...*grpcProto.Article) error {
 		}
 		for _, tag := range articles[i].Tags {
 
-			_, err := conn.Do("RPUSH", "list:"+articles[i].Id, tag)
+			_, err := conn.Do("RPUSH", tag+":"+d1, articles[i].Id)
+			if err != nil {
+				return fmt.Errorf("unable to insert %v with error %v", tag, err)
+			}
+			_, err = conn.Do("RPUSH", "list:"+articles[i].Id, tag)
 			if err != nil {
 				return fmt.Errorf("unable to insert %v with error %v", tag, err)
 			}
@@ -40,11 +51,54 @@ func (r *Redis) Populate(articles ...*grpcProto.Article) error {
 	return nil
 }
 
-type tmpStruct struct {
-	ID    string `redis:"id"`
-	Title string `redis:"title"`
-	Date  string `redis:"date"`
-	Body  string `redis:"body"`
+// GetTagInfo -
+func (r *Redis) GetTagInfo(tagName, date string) *grpcProto.TagInfo {
+
+	var conn redis.Conn
+	if r.Pool == nil {
+		r.initPool()
+		conn = r.Pool.Get()
+		r.ping(conn)
+	}
+	if conn == nil {
+		conn = r.Pool.Get()
+	}
+	defer conn.Close()
+	ids, err := redis.Strings(conn.Do("LRANGE", tagName+":"+date, 0, 2147483647))
+	if err != nil {
+		// TODO
+		// return nil, fmt.Errorf("unable to insert %v with error %v", tagName+":"+date, err)
+		log.Println("Error me")
+	}
+	tags := make(map[string]struct{})
+	for _, id := range ids {
+		taglist, err := r.GetTags(id)
+		if err != nil {
+			// TODO
+			// return nil, fmt.Errorf("unable to insert %v with error %v", id, err)
+			log.Println("Error me")
+		}
+		for _, tag := range taglist {
+			tags[tag] = struct{}{}
+		}
+	}
+	// TODO
+	return nil
+}
+
+// GetTags -
+func (r *Redis) GetTags(id string) ([]string, error) {
+	var conn redis.Conn
+	if r.Pool == nil {
+		r.initPool()
+		conn = r.Pool.Get()
+		r.ping(conn)
+	}
+	if conn == nil {
+		conn = r.Pool.Get()
+	}
+	defer conn.Close()
+	return redis.Strings(conn.Do("LRANGE", "list:"+id, 0, 2147483647))
 }
 
 // GetByID -
@@ -85,7 +139,7 @@ func (r *Redis) GetByID(id string) *grpcProto.Article {
 	a.Title = f.Title
 	a.Date = f.Date
 	a.Body = f.Body
-	a.Tags, err = redis.Strings(conn.Do("LRANGE", "list:"+id, 0, 2147483647))
+	a.Tags, err = r.GetTags(id)
 	if err != nil {
 		log.Printf("Shit %v, %T", err, []byte(dataset[3].([]byte)))
 	}

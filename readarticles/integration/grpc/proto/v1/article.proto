@@ -13,9 +13,20 @@ message Article{
 message ArticleRequest{
 	string api = 1;
 	string id = 2;
+	string date = 3;
+	string tag = 4;
+}
+
+message TagInfo{
+	string api = 1;
+	string tag = 2;
+	string count = 3;
+	repeated string articles = 4;
+	repeated string related_tags = 5;
 }
 
 // Service to manage Article tasks
 service ArticleService {
 	rpc GetArticle(ArticleRequest) returns (Article){}
+	rpc GetTagInfo(ArticleRequest) returns (TagInfo){}
 }
