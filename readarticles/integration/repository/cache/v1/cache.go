@@ -11,7 +11,7 @@ import (
 
 // Cache -
 type Cache interface {
-	GetByID(id string) *grpcProto.Article
+	GetByID(id string) (*grpcProto.Article, bool)
 	GetTagInfo(tag, date string) *grpcProto.TagInfo
 	Populate(...*grpcProto.Article) error
 }

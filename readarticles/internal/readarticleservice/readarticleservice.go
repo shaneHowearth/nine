@@ -64,10 +64,16 @@ func (a *articleServiceServer) GetArticle(ctx context.Context, req *grpcProto.Ar
 		iid, err := strconv.Atoi(id)
 		if err != nil {
 			log.Printf("Bad id supplied %s", id)
-			return &grpcProto.Article{}, fmt.Errorf("Bad id supplied %s", id)
+			return &grpcProto.Article{}, fmt.Errorf("bad id supplied %s", id)
 		}
-		article = a.Store.FetchOne(iid)
-		a.Cache.Populate(article)
+		article, _ = a.Store.FetchOne(iid)
+		if article == nil {
+			log.Println("Got nil back from FetchOne")
+			return &grpcProto.Article{}, nil
+		}
+		if err = a.Cache.Populate(article); err != nil {
+			log.Printf("Unable to populate cache with error: %v", err)
+		}
 	}
 	return article, nil
 }

@@ -32,6 +32,9 @@ func (r *Redis) Populate(articles ...*grpcProto.Article) error {
 	}
 	defer conn.Close()
 
+	if articles == nil {
+		return nil
+	}
 	for i := range articles {
 		d1 := strings.Split(articles[i].Date, "T")[0]
 		_, err := conn.Do("HSET", articles[i].Id, "title", articles[i].Title, "date", d1, "body", articles[i].Body)
@@ -112,7 +115,7 @@ func (r *Redis) GetTags(id string) ([]string, error) {
 }
 
 // GetByID -
-func (r *Redis) GetByID(id string) (article *grpcProto.Article, found bool) {
+func (r *Redis) GetByID(id string) (*grpcProto.Article, bool) {
 	// get conn and put back when exit from method
 	var conn redis.Conn
 	if r.Pool == nil {
@@ -133,6 +136,7 @@ func (r *Redis) GetByID(id string) (article *grpcProto.Article, found bool) {
 
 	// Put dataset into an Article
 	f := tmpStruct{}
+	article := &grpcProto.Article{}
 
 	if len(dataset) == 0 {
 		// Cache miss
@@ -143,6 +147,7 @@ func (r *Redis) GetByID(id string) (article *grpcProto.Article, found bool) {
 	if err != nil {
 		log.Printf("error scanning struct: %v", err)
 	}
+	log.Printf("Is Article nil? %v", article)
 	article.Id = id
 	article.Title = f.Title
 	article.Date = f.Date

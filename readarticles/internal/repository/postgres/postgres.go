@@ -26,7 +26,7 @@ func (p *Postgres) Connect() (err error) {
 }
 
 // FetchLatestRows -
-func (p *Postgres) FetchLatestRows(n int) (articles []*grpcProto.Article, err error) {
+func (p *Postgres) FetchLatestRows(n int) ([]*grpcProto.Article, error) {
 	if p.db == nil {
 		perr := p.Connect()
 		if perr != nil {
@@ -38,12 +38,17 @@ func (p *Postgres) FetchLatestRows(n int) (articles []*grpcProto.Article, err er
 		return nil, fmt.Errorf("postgres FetchLatestRows returned error: %v", err)
 	}
 
+	return p.toArticle(rows), nil
+}
+
+func (p *Postgres) toArticle(rows *sql.Rows) (articles []*grpcProto.Article) {
 	var id, title, date, body sql.NullString
 	var tags []sql.NullString
 	for rows.Next() {
-		log.Printf("ROWS: %#+v", rows)
-		if err := rows.Scan(&id, &title, &date, &body, pq.Array(&tags)); err != nil {
-			return nil, fmt.Errorf("failed to scan with error: %v", err)
+		err := rows.Scan(&id, &title, &date, &body, pq.Array(&tags))
+		if err != nil {
+			log.Printf("scan error in toArticle: %v", err)
+			continue
 		}
 		var tagStrings []string
 		for _, t := range tags {
@@ -51,27 +56,25 @@ func (p *Postgres) FetchLatestRows(n int) (articles []*grpcProto.Article, err er
 		}
 		articles = append(articles, &grpcProto.Article{Id: id.String, Title: title.String, Date: date.String, Body: body.String, Tags: tagStrings})
 	}
-	return articles, nil
+	return articles
 }
 
 // FetchOne -
-func (p *Postgres) FetchOne(aid int) (*grpcProto.Article, error) {
+func (p *Postgres) FetchOne(aid int) (article *grpcProto.Article, err error) {
 	if p.db == nil {
 		perr := p.Connect()
 		if perr != nil {
 			log.Fatalf("unable to connect to postgres server with error: %v", perr)
 		}
 	}
-	var id, title, date, body string
-	var tags []string
-	row, err := p.db.Query(`SELECT id, title, pub_date, body, tags FROM article WHERE id = $1;`, aid)
+
+	rows, err := p.db.Query(`SELECT id, title, pub_date, body, tags FROM article WHERE id = $1;`, aid)
 	if err != nil {
 		return nil, fmt.Errorf("postgres FetchOne returned error: %v", err)
 	}
-	if err = row.Scan(&id, &title, &date, &body, &tags); err != nil {
-		return nil, fmt.Errorf("scan in FetchOne returned error: %v", err)
-
+	articles := p.toArticle(rows)
+	if len(articles) == 1 {
+		return articles[0], nil
 	}
-
-	return &grpcProto.Article{Id: id, Title: title, Date: date, Body: body, Tags: tags}, nil
+	return
 }
