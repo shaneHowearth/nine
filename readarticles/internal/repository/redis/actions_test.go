@@ -41,9 +41,10 @@ func TestGetByID(t *testing.T) {
 			conn.Clear()
 			conn.Command("HGETALL").ExpectError(fmt.Errorf("unexpected Error"))
 
-			output := testR.GetByID(tc.title)
+			output, found := testR.GetByID(tc.title)
 
 			assert.Equal(t, &grpcProto.Article{}, output, "Article returned did not match expected")
+			assert.True(t, found, "Expected to find article")
 
 		})
 	}

@@ -2,7 +2,9 @@ package articleservice
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	grpcProto "github.com/shanehowearth/nine/readarticles/integration/grpc/proto/v1"
@@ -49,7 +51,6 @@ func NewArticleService(c repo.Cache, s database.Storage) grpcProto.ArticleServic
 
 // GetTagInfo -
 func (a *articleServiceServer) GetTagInfo(ctx context.Context, req *grpcProto.ArticleRequest) (*grpcProto.TagInfo, error) {
-	log.Printf("GetArticle readarticleservice req: %#+v", req)
 	article := a.Cache.GetTagInfo(req.GetTag(), req.GetDate())
 
 	return article, nil
@@ -57,8 +58,16 @@ func (a *articleServiceServer) GetTagInfo(ctx context.Context, req *grpcProto.Ar
 
 // GetArticle -
 func (a *articleServiceServer) GetArticle(ctx context.Context, req *grpcProto.ArticleRequest) (*grpcProto.Article, error) {
-	log.Printf("GetArticle readarticleservice req: %#+v", req)
-	article := a.Cache.GetByID(req.GetId())
-
+	id := req.GetId()
+	article, found := a.Cache.GetByID(id)
+	if !found {
+		iid, err := strconv.Atoi(id)
+		if err != nil {
+			log.Printf("Bad id supplied %s", id)
+			return &grpcProto.Article{}, fmt.Errorf("Bad id supplied %s", id)
+		}
+		article = a.Store.FetchOne(iid)
+		a.Cache.Populate(article)
+	}
 	return article, nil
 }

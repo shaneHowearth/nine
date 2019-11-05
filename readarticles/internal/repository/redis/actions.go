@@ -10,6 +10,7 @@ import (
 	grpcProto "github.com/shanehowearth/nine/readarticles/integration/grpc/proto/v1"
 )
 
+// tmpStruct because I do not want to mess with the generated grpc tags
 type tmpStruct struct {
 	ID    string `redis:"id"`
 	Title string `redis:"title"`
@@ -70,17 +71,13 @@ func (r *Redis) GetTagInfo(tagName, date string) *grpcProto.TagInfo {
 
 	ids, err := redis.Strings(conn.Do("LRANGE", tagName+":"+date, 0, 2147483647))
 	if err != nil {
-		// TODO
-		// return nil, fmt.Errorf("unable to insert %v with error %v", tagName+":"+date, err)
-		log.Println("Error me")
+		log.Printf("unable to get ids for %s with error %v", tagName+":"+date, err)
 	}
 	tags := make(map[string]struct{})
 	for _, id := range ids {
 		taglist, err := r.GetTags(id)
 		if err != nil {
-			// TODO
-			// return nil, fmt.Errorf("unable to insert %v with error %v", id, err)
-			log.Println("Error me")
+			log.Printf("unable to get tags for %s with error %v", id, err)
 		}
 		for _, tag := range taglist {
 			tags[tag] = struct{}{}
@@ -115,7 +112,7 @@ func (r *Redis) GetTags(id string) ([]string, error) {
 }
 
 // GetByID -
-func (r *Redis) GetByID(id string) *grpcProto.Article {
+func (r *Redis) GetByID(id string) (article *grpcProto.Article, found bool) {
 	// get conn and put back when exit from method
 	var conn redis.Conn
 	if r.Pool == nil {
@@ -131,30 +128,28 @@ func (r *Redis) GetByID(id string) *grpcProto.Article {
 	dataset, err := redis.Values(conn.Do("HGETALL", id))
 	if err != nil {
 		log.Printf("ERROR: failed get key %s, error %s", id, err.Error())
-		return &grpcProto.Article{}
+		return &grpcProto.Article{}, false
 	}
 
 	// Put dataset into an Article
-	a := grpcProto.Article{}
 	f := tmpStruct{}
 
 	if len(dataset) == 0 {
-		log.Printf("Cache miss looking for %s", id)
 		// Cache miss
-		// Check DB in case it exists
-		return &a
+		log.Printf("Cache miss looking for %s", id)
+		return article, false
 	}
 	err = redis.ScanStruct(dataset, &f)
 	if err != nil {
 		log.Printf("error scanning struct: %v", err)
 	}
-	a.Id = id
-	a.Title = f.Title
-	a.Date = f.Date
-	a.Body = f.Body
-	a.Tags, err = r.GetTags(id)
+	article.Id = id
+	article.Title = f.Title
+	article.Date = f.Date
+	article.Body = f.Body
+	article.Tags, err = r.GetTags(id)
 	if err != nil {
-		log.Printf("Shit %v, %T", err, []byte(dataset[3].([]byte)))
+		log.Printf("Unable to get tags for id %s with error %v", id, err)
 	}
-	return &a
+	return article, true
 }
