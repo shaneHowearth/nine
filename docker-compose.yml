@@ -1,5 +1,18 @@
 version: '3'
 services:
+    rabbitmq-server:
+        image: rabbitmq
+        hostname: "rabbitmq-server"
+        environment:
+            RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+            RABBITMQ_DEFAULT_USER: "guest"
+            RABBITMQ_DEFAULT_PASS: "guest"
+            RABBITMQ_DEFAULT_VHOST: "/"
+        ports:
+            - "15672"
+            - "5672"
+        labels:
+            NAME: "rabbitmq-server"
     articledb:
         build: articledb/
         ports:
@@ -7,7 +20,7 @@ services:
     creator:
         build: createarticles/
         ports:
-            - "5100:5100"
+            - "5100"
     restserver:
         build: REST/
         environment:
@@ -22,3 +35,4 @@ services:
             - "5200"
         depends_on:
             - articledb
+            - rabbitmq-server
