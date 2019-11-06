@@ -3,6 +3,8 @@ module github.com/shanehowearth/nine/readarticles
 go 1.12
 
 require (
+	bou.ke/monkey v1.0.1 // indirect
+	github.com/bouk/monkey v1.0.1
 	github.com/golang/protobuf v1.3.2
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/lib/pq v1.2.0
