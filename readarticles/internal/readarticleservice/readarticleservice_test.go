@@ -18,31 +18,28 @@ type mockRepoCache struct{}
 
 var cacheArticle *grpcProto.Article
 var cacheFound bool
-
-func (m *mockRepoCache) GetByID(id string) (*grpcProto.Article, bool) { return cacheArticle, cacheFound }
-
 var tagInfo *grpcProto.TagInfo
-
-func (m *mockRepoCache) GetTagInfo(tag, date string) *grpcProto.TagInfo { return tagInfo }
-
 var populateErr error
 
-func (m *mockRepoCache) Populate(...*grpcProto.Article) error { return populateErr }
+func (m *mockRepoCache) GetByID(id string) (*grpcProto.Article, bool)   { return cacheArticle, cacheFound }
+func (m *mockRepoCache) GetTagInfo(tag, date string) *grpcProto.TagInfo { return tagInfo }
+func (m *mockRepoCache) Populate(...*grpcProto.Article) error           { return populateErr }
 
 type mockStorage struct{}
 
 var fetchLatestRowsErr error
+var fetchOneError error
+var fetchOneArticle *grpcProto.Article
 
 func (ms *mockStorage) FetchLatestRows(n int) (as []*grpcProto.Article, e error) {
 	return as, fetchLatestRowsErr
 }
 
-var fetchOneError error
-var fetchOneArticle *grpcProto.Article
-
 func (ms *mockStorage) FetchOne(id int) (a *grpcProto.Article, e error) {
 	return fetchOneArticle, fetchOneError
 }
+
+// Begin tests
 
 func TestNewArticleService(t *testing.T) {
 	mockStore := &mockStorage{}
