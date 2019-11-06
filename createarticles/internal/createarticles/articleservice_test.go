@@ -16,15 +16,14 @@ import (
 
 type mockRepo struct{}
 
-var storeError error
-var storeString string
-
 func (m *mockRepo) Create(article *grpcProto.Article) (s string, e error) {
 	return storeString, storeError
 }
 
 type mockmessageQueue struct{}
 
+var storeError error
+var storeString string
 var signalError error
 
 func (m2 *mockmessageQueue) Publish(id string) error { return signalError }
