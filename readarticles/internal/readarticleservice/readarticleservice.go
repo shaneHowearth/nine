@@ -12,19 +12,19 @@ import (
 	database "github.com/shanehowearth/nine/readarticles/integration/repository/database/v1"
 )
 
-// Server
+// Server -
 type Server struct {
 	Cache repo.Cache
 	Store database.Storage
 }
 
-// NewArticleService
-func NewArticleService(c repo.Cache, s database.Storage) *Server { //grpcProto.ArticleServiceServer {
+// NewArticleService -
+func NewArticleService(c repo.Cache, s database.Storage) *Server {
 	if c == nil {
-		log.Panic("Cache supplied for NewArticleService is nil")
+		log.Fatal("Cache supplied for NewArticleService is nil")
 	}
 	if s == nil {
-		log.Panic("Store supplied for NewArticleService is nil")
+		log.Fatal("Store supplied for NewArticleService is nil")
 	}
 	a := Server{Cache: c, Store: s}
 	// Fill the cache with data
@@ -51,9 +51,9 @@ func NewArticleService(c repo.Cache, s database.Storage) *Server { //grpcProto.A
 
 // GetTagInfo -
 func (a *Server) GetTagInfo(ctx context.Context, req *grpcProto.ArticleRequest) (*grpcProto.TagInfo, error) {
-	article := a.Cache.GetTagInfo(req.GetTag(), req.GetDate())
+	tagInfo := a.Cache.GetTagInfo(req.GetTag(), req.GetDate())
 
-	return article, nil
+	return tagInfo, nil
 }
 
 // GetArticle -
@@ -64,7 +64,7 @@ func (a *Server) GetArticle(ctx context.Context, req *grpcProto.ArticleRequest) 
 		iid, err := strconv.Atoi(id)
 		if err != nil {
 			log.Printf("Bad id supplied %s", id)
-			return &grpcProto.Article{}, fmt.Errorf("bad id supplied %s", id)
+			return &grpcProto.Article{}, fmt.Errorf("bad id supplied %q", id)
 		}
 		article, _ = a.Store.FetchOne(iid)
 		if article == nil {
