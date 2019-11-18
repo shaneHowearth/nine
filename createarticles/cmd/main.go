@@ -17,10 +17,34 @@ import (
 
 type server struct{}
 
-var ss = article.NewArticleService(new(repo.Postgres), new(messagequeue.MQ))
+var ss *article.Server
 
 func main() {
 
+	ok := false
+
+	// Datastore
+	ds := new(repo.Postgres)
+	ds.Retry = 1
+
+	ds.URI, ok = os.LookupEnv("DBURI")
+	if !ok {
+		log.Fatalf("DBURI is not set")
+	}
+
+	// Message Queue
+	mq := new(messagequeue.MQ)
+	mq.Retry = 1
+
+	mq.URI, ok = os.LookupEnv("MQURI")
+	if !ok {
+		log.Fatalf("MQURI is not set")
+	}
+
+	// Article Service
+	ss = article.NewArticleService(ds, mq)
+
+	// gRPC service
 	portNum := os.Getenv("PORT_NUM")
 	lis, err := net.Listen("tcp", "0.0.0.0:"+portNum)
 	if err != nil {

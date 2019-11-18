@@ -3,6 +3,7 @@ package rabbit
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -10,18 +11,34 @@ import (
 
 // MQ -
 type MQ struct {
-	conn *amqp.Connection
+	conn  *amqp.Connection
+	Retry int
+	URI   string
 }
 
+var amqpDial = amqp.Dial
+
 // Connect -
-func (r *MQ) Connect() (err error) {
-	//TODO Get this from env
+func (mq *MQ) Connect() (err error) {
+	// Retry MUST be > 0
+	if mq.Retry == 0 {
+		log.Printf("Cannot use a Retry of zero, this process will to default retry to 5")
+		mq.Retry = 5
+	}
+
+	// Note: Even though amqp.ParseURI(uri) will validate the URI formed, check here that the minimum required exists
+	if mq.URI == "" {
+		log.Printf("No Message Queue URI configured")
+	}
+
 	for {
-		for i := 0; i < 5; i++ {
-			r.conn, err = amqp.Dial("amqp://guest:guest@rabbitmq-server:5672/")
+		for i := 0; i < mq.Retry; i++ {
+			mq.conn, err = amqpDial(mq.URI)
 			if err == nil {
-				return
+				// Successful connection
+				return nil
 			}
+			time.Sleep(1 * time.Second)
 		}
 		log.Printf("Trouble connecting to RabbitMQ, error: %v", err)
 		time.Sleep(5 * time.Second)
@@ -29,14 +46,14 @@ func (r *MQ) Connect() (err error) {
 }
 
 // Publish -
-func (r *MQ) Publish(id string) error {
-	if r.conn == nil {
-		err := r.Connect()
+func (mq *MQ) Publish(id string) error {
+	if mq.conn == nil {
+		err := mq.Connect()
 		if err != nil {
 			return fmt.Errorf("failed to create connection with error: %v", err)
 		}
 	}
-	ch, err := r.conn.Channel()
+	ch, err := mq.conn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to create channel with error: %v", err)
 	}

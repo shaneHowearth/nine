@@ -20,10 +20,10 @@ type Server struct {
 // NewArticleService creates Article service.
 func NewArticleService(s repository.Storage, mq messagequeue.MQ) *Server {
 	if s == nil {
-		log.Fatal("NewArticleService has no cache to get articles from")
+		log.Panic("NewArticleService has no cache to get articles from")
 	}
 	if mq == nil {
-		log.Fatal("NewArticleService has no messagequeue to send to")
+		log.Panic("NewArticleService has no messagequeue to send to")
 
 	}
 	a := Server{Storage: s, Signal: mq}
@@ -33,7 +33,7 @@ func NewArticleService(s repository.Storage, mq messagequeue.MQ) *Server {
 // CreateArticle - Create Article.
 func (a *Server) CreateArticle(ctx context.Context, req *grpc.Article) (*grpc.Acknowledgement, error) {
 	// Handler validates the input.
-	id, err := a.Storage.Create(req)
+	id, err := a.Storage.CreateArticle(req)
 	if err != nil {
 		// create a unique uuid for the user to quote to tech support.
 		uuid, uuiderr := uuid.NewUUID()

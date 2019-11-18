@@ -16,7 +16,7 @@ import (
 
 type mockRepo struct{}
 
-func (m *mockRepo) Create(article *grpcProto.Article) (s string, e error) {
+func (m *mockRepo) CreateArticle(article *grpcProto.Article) (s string, e error) {
 	return storeString, storeError
 }
 
@@ -38,23 +38,20 @@ func TestNewArticleService(t *testing.T) {
 		errMessage  string
 		expectPanic bool
 	}{
-		"Happy Path": {store: mockStore,
-			mq:     mockMQ,
-			server: SUT.Server{Storage: mockStore, Signal: mockMQ},
-		},
+		"Happy Path":      {store: mockStore, mq: mockMQ, server: SUT.Server{Storage: mockStore, Signal: mockMQ}},
 		"Missing Storage": {mq: mockMQ, errMessage: "NewArticleService has no cache to get articles from", expectPanic: true},
 		"Missing MQ":      {store: mockStore, errMessage: "NewArticleService has no messagequeue to send to", expectPanic: true},
 	}
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
 			if tc.expectPanic {
-				fakeLogFatal := func(msg ...interface{}) {
+				fakeLogPanic := func(msg ...interface{}) {
 					assert.Equal(t, tc.errMessage, msg[0])
-					panic("log.Fatal called")
+					panic(tc.errMessage)
 				}
-				patch := monkey.Patch(log.Fatal, fakeLogFatal)
+				patch := monkey.Patch(log.Panic, fakeLogPanic)
 				defer patch.Unpatch()
-				assert.PanicsWithValue(t, "log.Fatal called", func() { SUT.NewArticleService(tc.store, tc.mq) }, "log.Fatal was not called")
+				assert.PanicsWithValue(t, tc.errMessage, func() { SUT.NewArticleService(tc.store, tc.mq) }, "log.Fatal was not called")
 			} else {
 				output := SUT.NewArticleService(tc.store, tc.mq)
 				assert.Equal(t, *output, tc.server)
@@ -96,7 +93,7 @@ func TestCreateArticle(t *testing.T) {
 				assert.Equal(t, tc.storeID, (*output).Id, "Expecting Acknowledgement id to be the same")
 			} else {
 				assert.NotNil(t, err, "Was expecting an error %v", err)
-				assert.NotEqual(t, tc.storeID, (*output).Id, "Expecting Acknowledgement id to be the same")
+				assert.NotEqual(t, tc.storeID, (*output).Id, "Expecting Acknowledgement id to be different")
 			}
 			assert.Equal(t, tc.response, *output, "Expecting Acknowledgement")
 		})
