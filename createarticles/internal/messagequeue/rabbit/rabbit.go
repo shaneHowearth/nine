@@ -3,7 +3,7 @@ package rabbit
 import (
 	"fmt"
 	"log"
-	"strconv"
+	"math/rand"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -40,8 +40,11 @@ func (mq *MQ) Connect() (err error) {
 			}
 			time.Sleep(1 * time.Second)
 		}
-		log.Printf("Trouble connecting to RabbitMQ, error: %v", err)
-		time.Sleep(5 * time.Second)
+		// Log that there is a problem connecting to the RabbitMQ service that needs urgent attention
+		// TODO Make this something that will trigger a monitoring alert
+		backoff := time.Duration(mq.Retry*rand.Intn(10)) * time.Second
+		log.Printf("ALERT: Trouble connecting to RabbitMQ, error: %v, going to re-enter retry loop in %s seconds", err, backoff.String())
+		time.Sleep(backoff)
 	}
 }
 

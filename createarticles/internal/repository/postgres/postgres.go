@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -42,8 +43,9 @@ func (p *Postgres) Connect() (err error) {
 			time.Sleep(1 * time.Second)
 		}
 
-		log.Printf("Unable to open connection to postgres, error: %v", err)
-		time.Sleep(5 * time.Second)
+		backoff := time.Duration(p.Retry*rand.Intn(10)) * time.Second
+		log.Printf("ALERT: Trouble connecting to Postgres, error: %v, going to re-enter retry loop in %s seconds", err, backoff.String())
+		time.Sleep(backoff)
 	}
 }
 
