@@ -20,22 +20,24 @@ type Postgres struct {
 	URI   string
 }
 
+var sqlOpen = sql.Open
+
 // Connect - Create the connection to the database
 func (p *Postgres) Connect() (err error) {
 	// Retry MUST be >= 1
 	if p.Retry == 0 {
-		log.Print("Cannot use a Retry of zero, this process will to default retry to 1")
-		p.Retry = 1
+		log.Print("Cannot use a Retry of zero, this process will to default retry to 5")
+		p.Retry = 5
 	}
 	if p.URI == "" {
-		log.Fatalf("No Postgres URI configured")
+		log.Panicf("No Postgres URI configured")
 	}
 
 	// Infinite loop
 	// Keep trying forever
 	for {
 		for i := 0; i < p.Retry; i++ {
-			p.db, err = sql.Open("postgres", p.URI)
+			p.db, err = sqlOpen("postgres", p.URI)
 			if err == nil {
 				// Successful connection
 				return nil
