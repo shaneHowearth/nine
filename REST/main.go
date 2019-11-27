@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -39,7 +42,25 @@ func main() {
 	}
 
 	portNum := os.Getenv("PORT_NUM")
-	log.Fatal(http.ListenAndServe(":"+portNum, router))
+	server := &http.Server{Addr: portNum, Handler: router}
+	go func() {
+		if err := server.ListenAndServe(); err != nil {
+			log.Panicf("Listen and serve returned error: %v", err)
+		}
+	}()
+
+	// Setting up signal capturing
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+
+	// Waiting for SIGINT (pkill -2)
+	<-stop
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("server shutdown returned error %v", err)
+	}
 }
 
 // respondwithError return error message
