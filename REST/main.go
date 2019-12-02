@@ -42,7 +42,7 @@ func main() {
 	}
 
 	portNum := os.Getenv("PORT_NUM")
-	server := &http.Server{Addr: portNum, Handler: router}
+	server := &http.Server{Addr: "0.0.0.0:" + portNum, Handler: router}
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
 			log.Panicf("Listen and serve returned error: %v", err)
