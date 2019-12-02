@@ -20,7 +20,7 @@ func TestConnect(t *testing.T) {
 	}{
 		"Happy Path":   {retry: 1, uri: "postgres://pqgotest:password@localhost/pqgotest?sslmode=disable"},
 		"No Retry set": {uri: "postgres://pqgotest:password@localhost/pqgotest?sslmode=disable"},
-		"No URI set":   {retry: 1, willPanic: true, err: fmt.Errorf("No Postgres URI configured")},
+		"No URI set":   {retry: 1, willPanic: true, err: fmt.Errorf("no Postgres URI configured")},
 	}
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {

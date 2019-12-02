@@ -30,7 +30,7 @@ func (p *Postgres) Connect() (err error) {
 		p.Retry = 5
 	}
 	if p.URI == "" {
-		log.Panicf("No Postgres URI configured")
+		log.Panicf("no Postgres URI configured")
 	}
 
 	// Infinite loop
@@ -39,8 +39,13 @@ func (p *Postgres) Connect() (err error) {
 		for i := 0; i < p.Retry; i++ {
 			p.db, err = sqlOpen("postgres", p.URI)
 			if err == nil {
-				// Successful connection
-				return nil
+				if pingerr := p.db.Ping(); pingerr != nil {
+					log.Printf("Unable to ping database with error %v", pingerr)
+				} else {
+					// Successful connection
+				log.Print("Successfully connected to postgres DB")
+					return nil
+				}
 			}
 			time.Sleep(1 * time.Second)
 		}
@@ -64,7 +69,7 @@ func (p *Postgres) CreateArticle(article *grpcProto.Article) (string, error) {
 	err := p.db.QueryRow(`INSERT INTO article(title, pub_date, body, tags)
 	VALUES($1, $2, $3, $4) RETURNING id`, article.GetTitle(), article.GetDate(), article.GetBody(), pq.Array(article.GetTags())).Scan(&id)
 	if err != nil {
-		return "", fmt.Errorf("postgres CreateOrUpdate returned error: %v", err)
+		return "", fmt.Errorf("postgres CreateArticle returned error: %v", err)
 	}
 	return strconv.Itoa(id), nil
 }
