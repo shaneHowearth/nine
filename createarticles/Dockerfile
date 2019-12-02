@@ -18,8 +18,4 @@ FROM scratch
 WORKDIR /root/
 COPY --from=0 /go/bin/createarticle .
 # run options
-ENV MQURI="amqp://guest:guest@rabbitmq-server:5672/"
-ENV DBURI="postgres://articlewriter:hu8jmn3@articledb/article_postgres_db?sslmode=disable"
-ENV PORT_NUM=5100
-EXPOSE 5100
 ENTRYPOINT ["./createarticle"]

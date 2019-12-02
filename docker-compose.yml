@@ -15,10 +15,17 @@ services:
             NAME: "rabbitmq-server"
     articledb:
         build: articledb/
+        hostname: "articledb"
         ports:
             - "5432"
+        labels:
+            NAME: "articledb"
     creator:
         build: createarticles/
+        environment:
+            - MQURI=amqp://guest:guest@rabbitmq-server:5672/
+            - DBURI=postgres://articlewriter:hu8jmn3@articledb:5432/article_postgres_db?sslmode=disable
+            - PORT_NUM=5100
         ports:
             - "5100"
     restserver:

@@ -1,7 +1,6 @@
 FROM golang:1.13 as builder
 
 # modules
-ENV GO111MODULE=on
 WORKDIR $GOPATH/src/readarticles
 ADD . $GOPATH/src/readarticles
 
@@ -22,7 +21,5 @@ COPY . .
 COPY readarticle.sh .
 RUN chmod 777 readarticle.sh
 
-# install and run redis (in the background)
-# RUN apt-get update && apt-get -y install redis-server
-
+# run the readarticle script
 ENTRYPOINT ["./readarticle.sh"]

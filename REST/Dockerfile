@@ -12,12 +12,11 @@ RUN go mod download
 COPY . .
 
 # build time
-ENV PORT_NUM=80
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o /go/bin/REST main.go routes.go
 
 FROM scratch
 WORKDIR /root/
 COPY --from=0 /go/bin/REST .
 
-# run options
+# run the rest server
 ENTRYPOINT ["./REST"]
